@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 
-  <title>ArchiLogic팀 음압병실 모듈 AR 프로그램</title>
+  <title>음압병실 모듈 AR 프로그램</title>
   
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.0/model-viewer.min.js"></script>
 
@@ -50,7 +50,7 @@
       font-size: 15px;
       font-weight: bold;
       color: #333;
-      width: 80px;
+      width: 60px;
     }
 
     .controls select {
@@ -61,29 +61,14 @@
       background-color: #fff;
       cursor: pointer;
       outline: none;
-      width: 180px;
-    }
-
-    .upload-btn {
-      background-color: #555;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 16px;
-      font-size: 14px;
-      cursor: pointer;
-      width: 270px;
-    }
-
-    .upload-btn:active {
-      background-color: #333;
+      width: 220px;
     }
 
     /* 뷰어 영역 포지셔닝 설정 */
     .viewer-container {
       position: relative;
       width: 100%;
-      height: 55vh;
+      height: 65vh;
     }
 
     model-viewer {
@@ -96,17 +81,25 @@
     /* 90도 회전 컨트롤 패널 (뷰어 상단 오버레이) */
     .rotate-controls {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      top: 15px;
+      right: 15px;
       z-index: 10;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 8px;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 10px 8px;
       border-radius: 12px;
       backdrop-filter: blur(4px);
+    }
+
+    .rotate-title {
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 2px;
+      user-select: none;
     }
 
     .rotate-row {
@@ -170,7 +163,7 @@
 <body>
 
   <header>
-    AR 뷰어
+    음압병실 모듈 AR 프로그램
   </header>
 
   <div class="controls">
@@ -180,26 +173,12 @@
         <option value="">목록 불러오는 중...</option>
       </select>
     </div>
-    
-    <div class="row">
-      <label for="placement-select">배치:</label>
-      <select id="placement-select">
-        <option value="floor">바닥에 놓기 (Floor)</option>
-        <option value="wall">벽에 붙이기 (Wall)</option>
-      </select>
-    </div>
-
-    <div class="row">
-      <input type="file" id="file-input" accept=".glb, .gltf" style="display: none;">
-      <button class="upload-btn" onclick="document.getElementById('file-input').click()">
-        📁 내 폰/PC에서 파일 열기
-      </button>
-    </div>
   </div>
 
   <div class="viewer-container">
     <!-- 회전 제어 방향키 오버레이 -->
     <div class="rotate-controls">
+      <span class="rotate-title">모듈 회전</span>
       <button class="rotate-btn" id="rot-up" title="상 방향 90도 회전">▲</button>
       <div class="rotate-row">
         <button class="rotate-btn" id="rot-left" title="좌 방향 90도 회전">◄</button>
@@ -210,7 +189,7 @@
 
     <model-viewer 
       id="viewer"
-      alt="3D 모델" 
+      alt="음압병실 모듈 3D 모델" 
       ar 
       ar-modes="webxr scene-viewer quick-look" 
       ar-placement="floor" 
@@ -219,7 +198,7 @@
       auto-rotate 
       shadow-intensity="1">
       
-      <button slot="ar-button" class="ar-button" id="ar-button-text">
+      <button slot="ar-button" class="ar-button">
         📷 카메라로 바닥에 놓기
       </button>
       
@@ -233,15 +212,11 @@
     const modelViewer = document.querySelector('#viewer');
     const arPrompt = document.querySelector('#ar-prompt');
     const modelSelect = document.querySelector('#model-select');
-    const placementSelect = document.querySelector('#placement-select');
-    const fileInput = document.querySelector('#file-input');
-    const arButtonText = document.querySelector('#ar-button-text');
 
     // 현재 모델의 회전 각도 상태 관리 (X, Y, Z축 deg)
     let rotX = 0;
     let rotY = 0;
     let rotZ = 0;
-    let currentObjectUrl = null; // 로컬 파일 메모리 해제용
 
     // 회전값 업데이트 및 적용 함수
     function applyOrientation() {
@@ -273,26 +248,7 @@
       applyOrientation();
     });
 
-    // 배치 방법(바닥/벽) 변경 감지
-    placementSelect.addEventListener('change', (event) => {
-      const mode = event.target.value;
-      
-      if (mode === 'wall') {
-        modelViewer.setAttribute('ar-placement', 'wall');
-        rotX = 90; rotY = 0; rotZ = 0;
-        applyOrientation();
-        arButtonText.textContent = '📷 카메라로 벽에 붙이기';
-        arPrompt.textContent = '벽을 천천히 비춘 후, 원하는 곳을 터치하세요!';
-      } else {
-        modelViewer.setAttribute('ar-placement', 'floor');
-        rotX = 0; rotY = 0; rotZ = 0;
-        applyOrientation();
-        arButtonText.textContent = '📷 카메라로 바닥에 놓기';
-        arPrompt.textContent = '바닥이나 책상을 천천히 비춘 후, 원하는 곳을 터치하세요!';
-      }
-    });
-
-    // 정적 models.json 파일로부터 .glb 목록 불러오기 (API 호출 제한 없음)
+    // models.json 파일로부터 모델 목록 불러오기
     fetch('models.json')
       .then(response => {
         if (!response.ok) {
@@ -327,26 +283,6 @@
     modelSelect.addEventListener('change', (event) => {
       if (event.target.value) {
         modelViewer.src = event.target.value;
-      }
-    });
-
-    // 내 파일 열기 (로컬 업로드)
-    fileInput.addEventListener('change', (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        // 기존 생성된 Blob URL이 있다면 메모리 해제
-        if (currentObjectUrl) {
-          URL.revokeObjectURL(currentObjectUrl);
-        }
-
-        currentObjectUrl = URL.createObjectURL(file);
-        modelViewer.src = currentObjectUrl;
-        
-        const option = document.createElement('option');
-        option.value = currentObjectUrl;
-        option.textContent = `(직접 열기) ${file.name}`;
-        option.selected = true;
-        modelSelect.appendChild(option);
       }
     });
 
