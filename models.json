@@ -1,4 +1,10 @@
 [
-  "음압병실 구조-설비.glb",
-  "음압병실 모듈.glb"
+  {
+    "title": "음압병실 구조-설비",
+    "file": "ward_structure.glb"
+  },
+  {
+    "title": "음압병실 모듈",
+    "file": "ward_module.glb"
+  }
 ]
