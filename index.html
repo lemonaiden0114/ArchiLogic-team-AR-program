@@ -229,50 +229,54 @@
     document.querySelector('#rot-left').addEventListener('click', () => { rotY -= 90; applyOrientation(); });
     document.querySelector('#rot-right').addEventListener('click', () => { rotY += 90; applyOrientation(); });
 
-    // 모델 세팅 헬퍼 함수 (한글/공백 URL 인코딩 처리)
+    // 모델 세팅 헬퍼 함수
     function setModel(fileName) {
-      const encodedGlb = encodeURI(fileName);
-      const encodedUsdz = encodeURI(fileName.replace(/\.glb$/i, '.usdz'));
-
-      modelViewer.src = encodedGlb;
-      modelViewer.setAttribute('ios-src', encodedUsdz);
+      // 영문 파일명이므로 encodeURI 없이 깔끔하게 바로 매핑
+      modelViewer.src = fileName;
+      
+      const usdzName = fileName.replace(/\.glb$/i, '.usdz');
+      // Quick Look 스케일 보정 파라미터 추가
+      modelViewer.setAttribute('ios-src', `${usdzName}#allowsContentScaling=0`);
     }
 
-    // 캐시 방지 파라미터 적용
+    // 캐시 방지 파라미터와 함께 models.json 로드
     fetch(`models.json?v=${Date.now()}`)
       .then(response => {
         if (!response.ok) throw new Error('models.json 로드 실패');
         return response.json();
       })
-      .then(glbFiles => {
+      .then(models => {
         modelSelect.innerHTML = ''; 
         
-        if (!glbFiles || glbFiles.length === 0) {
-          modelSelect.innerHTML = '<option value="">.glb 파일이 없습니다</option>';
+        if (!models || models.length === 0) {
+          modelSelect.innerHTML = '<option value="">등록된 모델이 없습니다</option>';
           return;
         }
 
-        glbFiles.forEach(fileName => {
+        // 화면에는 한글(title), 실제 값에는 영문 파일명(file) 할당
+        models.forEach(item => {
           const option = document.createElement('option');
-          option.value = fileName;
-          option.textContent = fileName;
+          option.value = item.file;
+          option.textContent = item.title;
           modelSelect.appendChild(option);
         });
 
-        // 초기 모델 로드
-        setModel(glbFiles[0]);
+        // 첫 번째 모델 기본 로드
+        setModel(models[0].file);
       })
       .catch(error => {
         modelSelect.innerHTML = '<option value="">목록 불러오기 실패</option>';
         console.error('모델 로드 에러:', error);
       });
 
+    // 드롭다운 모델 변경 감지
     modelSelect.addEventListener('change', (event) => {
       if (event.target.value) {
         setModel(event.target.value);
       }
     });
 
+    // AR 모드 진입/종료 UI 핸들링
     modelViewer.addEventListener('ar-status', (event) => {
       if (event.detail.status === 'session-started') {
         modelViewer.style.opacity = '0'; 
