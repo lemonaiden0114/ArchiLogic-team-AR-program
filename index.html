@@ -79,55 +79,6 @@
       --poster-color: transparent;
     }
 
-    /* 90도 회전 컨트롤 패널 (뷰어 상단 오버레이) */
-    .rotate-controls {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      background: rgba(0, 0, 0, 0.6);
-      padding: 10px 8px;
-      border-radius: 12px;
-      backdrop-filter: blur(4px);
-    }
-
-    .rotate-title {
-      color: #ffffff;
-      font-size: 12px;
-      font-weight: bold;
-      margin-bottom: 2px;
-      user-select: none;
-    }
-
-    .rotate-row {
-      display: flex;
-      gap: 4px;
-    }
-
-    .rotate-btn {
-      background-color: #ffffff;
-      color: #333;
-      border: none;
-      border-radius: 6px;
-      width: 36px;
-      height: 36px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .rotate-btn:active {
-      background-color: #ddd;
-    }
-
     .ar-button {
       background-color: #4CAF50;
       color: white;
@@ -187,17 +138,6 @@
   </div>
 
   <div class="viewer-container">
-    <!-- 회전 제어 방향키 오버레이 -->
-    <div class="rotate-controls">
-      <span class="rotate-title">모듈 회전</span>
-      <button class="rotate-btn" id="rot-up" title="상 방향 90도 회전">▲</button>
-      <div class="rotate-row">
-        <button class="rotate-btn" id="rot-left" title="좌 방향 90도 회전">◄</button>
-        <button class="rotate-btn" id="rot-right" title="우 방향 90도 회전">►</button>
-      </div>
-      <button class="rotate-btn" id="rot-down" title="하 방향 90도 회전">▼</button>
-    </div>
-
     <!-- 안드로이드 전용 AR 모드: webxr, scene-viewer -->
     <model-viewer 
       id="viewer"
@@ -223,28 +163,13 @@
   <!-- 사이트 하단 안내 문구 -->
   <div class="footer-notice">
     AR 배치는 안드로이드만 가능합니다
+    모델은 1:20 스케일 입니다
   </div>
 
   <script>
     const modelViewer = document.querySelector('#viewer');
     const arPrompt = document.querySelector('#ar-prompt');
     const modelSelect = document.querySelector('#model-select');
-
-    let rotX = 0;
-    let rotY = 0;
-    let rotZ = 0;
-
-    function applyOrientation() {
-      rotX = (rotX % 360 + 360) % 360;
-      rotY = (rotY % 360 + 360) % 360;
-      rotZ = (rotZ % 360 + 360) % 360;
-      modelViewer.setAttribute('orientation', `${rotX}deg ${rotY}deg ${rotZ}deg`);
-    }
-
-    document.querySelector('#rot-up').addEventListener('click', () => { rotX -= 90; applyOrientation(); });
-    document.querySelector('#rot-down').addEventListener('click', () => { rotX += 90; applyOrientation(); });
-    document.querySelector('#rot-left').addEventListener('click', () => { rotY -= 90; applyOrientation(); });
-    document.querySelector('#rot-right').addEventListener('click', () => { rotY += 90; applyOrientation(); });
 
     // 모델 로드 함수 (.glb 전용)
     function setModel(fileName) {
